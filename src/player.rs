@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{components::Position, resources::GlyphAssets, tiles::TILESIZE};
+use crate::{components::Position, resources::GlyphAssets, tiles::{TILESIZE, TileType}, map::Level};
 
 #[derive(Component, Default, Debug)]
 pub struct Player;
@@ -60,20 +60,29 @@ fn setup(mut commands: Commands, atlas: Res<GlyphAssets>) {
 fn movement(
     mut player_query: Query<(&mut Position, &mut Transform), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
+    map : Res<Level>
 ) {
     for mut player in player_query.iter_mut() {
-        if keyboard_input.pressed(KeyCode::W) {
-            player.0.y += 1;
-            player.1.translation.y += 1.0 * TILESIZE as f32;
-        } else if keyboard_input.pressed(KeyCode::A) {
-            player.0.x -= 1;
-            player.1.translation.x -= 1.0 * TILESIZE as f32;
-        } else if keyboard_input.pressed(KeyCode::S) {
-            player.0.y -= 1;
-            player.1.translation.y -= 1.0 * TILESIZE as f32;
-        } else if keyboard_input.pressed(KeyCode::D) {
-            player.0.x += 1;
-            player.1.translation.x += 1.0 * TILESIZE as f32;
+        if keyboard_input.just_pressed(KeyCode::W) {
+            if map.tiles.get_key_value(&(player.0.x, player.0.y + 1)).unwrap().1 != &TileType::WALL {
+                player.0.y += 1;
+                player.1.translation.y += 1.0 * TILESIZE as f32;
+            }
+        } else if keyboard_input.just_pressed(KeyCode::A) {
+            if map.tiles.get_key_value(&(player.0.x - 1, player.0.y)).unwrap().1 != &TileType::WALL {
+                player.0.x -= 1;
+                player.1.translation.x -= 1.0 * TILESIZE as f32;
+            }
+        } else if keyboard_input.just_pressed(KeyCode::S) {
+            if map.tiles.get_key_value(&(player.0.x, player.0.y - 1)).unwrap().1 != &TileType::WALL {
+                player.0.y -= 1;
+                player.1.translation.y -= 1.0 * TILESIZE as f32;
+            }
+        } else if keyboard_input.just_pressed(KeyCode::D) {
+            if map.tiles.get_key_value(&(player.0.x + 1, player.0.y)).unwrap().1 != &TileType::WALL {
+                player.0.x += 1;
+                player.1.translation.x += 1.0 * TILESIZE as f32;
+            }
         }
     }
 }

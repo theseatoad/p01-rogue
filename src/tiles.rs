@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::components::{Collision, Visible};
 pub const TILESIZE : usize = 12;
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone)]
 pub enum TileType {
     WALL,
     FLOOR,
