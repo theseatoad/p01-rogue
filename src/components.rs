@@ -1,15 +1,12 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-struct Position {
-    x: i32,
-    y: i32,
+pub struct Position {
+    pub x: i32,
+    pub y: i32,
 }
+#[derive(Component)]
+pub struct Collision;
 
 #[derive(Component)]
-struct Renderable {
-    // Let this represent the character on the spritesheet.
-    glyph: (usize, usize),
-    fg: Color,
-    bg: Option<Color>,
-}
+pub struct MainCamera;
