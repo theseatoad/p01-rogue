@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::components::Collision;
+use crate::components::{Collision, Visible};
 pub const TILESIZE : usize = 12;
 #[derive(PartialEq, Copy, Clone)]
 pub enum TileType {
@@ -17,6 +17,7 @@ pub struct WallBundle {
     sprite_sheet_bundle: SpriteSheetBundle,
     collision: Collision,
     tile: Tile,
+    visible : Visible
 }
 
 impl WallBundle {
@@ -45,6 +46,7 @@ impl WallBundle {
             },
             collision: Collision,
             tile: Tile(TileType::WALL),
+            visible : Visible
         }
     }
 }
@@ -55,6 +57,7 @@ pub struct FloorBundle {
     #[bundle]
     sprite_sheet_bundle: SpriteSheetBundle,
     tile: Tile,
+    visible : Visible
 }
 
 impl FloorBundle {
@@ -82,6 +85,7 @@ impl FloorBundle {
                 ..default()
             },
             tile: Tile(TileType::FLOOR),
+            visible : Visible
         }
     }
 }
