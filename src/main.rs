@@ -10,7 +10,8 @@ mod player;
 mod rendering;
 mod resources;
 mod tiles;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+mod utils;
+//bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 fn main() {
     App::new()
@@ -28,7 +29,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        .add_plugin(WorldInspectorPlugin)
+        //.add_plugin(WorldInspectorPlugin)
         .add_startup_system(setup.at_start())
         .add_plugin(MapPlugin)
         .add_plugin(PlayerPlugin)

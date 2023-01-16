@@ -1,25 +1,32 @@
-use bevy::{prelude::*, utils::HashMap};
+use std::collections::HashMap;
 
 use crate::{
     resources::GlyphAssets,
-    tiles::{FloorBundle, TileType, WallBundle},
+    tiles::{FloorBundle, TileType},
 };
+
+use map_gen_2d::{bsp::*, Point, Tile};
+use bevy::prelude::*;
+use rand::prelude::*;
 
 #[derive(Resource)]
 pub struct Level {
-    pub tiles: HashMap<(i32, i32), TileType>,
+    pub tiles: HashMap<Point, Tile>,
     pub size: (usize, usize),
 }
 
 impl Level {
     pub fn new() -> Self {
+        let map = BSPMap::new(Point::new(50,30), SeedableRng::seed_from_u64(1), Point::new(5,3), Point::new(10,8)).unwrap();
         Level {
-            tiles: HashMap::new(),
-            size: (20, 20),
+            tiles: map.get_tiles().clone(),
+            size: (50, 30),
         }
     }
 }
 
+// ============================
+// ========== PLUGIN ==========
 pub struct MapPlugin;
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
@@ -28,18 +35,12 @@ impl Plugin for MapPlugin {
 }
 
 fn setup(mut commands: Commands, atlas: Res<GlyphAssets>) {
-    let mut level = Level::new();
-    for x in 0..level.size.0 {
-        for y in 0..level.size.1 {
-            if x == 0 || x == level.size.0 - 1 {
-                level.tiles.insert((x as i32,y as i32), TileType::WALL);
-                commands.spawn(WallBundle::new((x as i32, y as i32), atlas.atlas.clone()));
-            } else if y == 0 || y == level.size.1 - 1 {
-                level.tiles.insert((x as i32,y as i32), TileType::WALL);
-                commands.spawn(WallBundle::new((x as i32, y as i32), atlas.atlas.clone()));
-            } else {
-                level.tiles.insert((x as i32,y as i32), TileType::FLOOR);
-                commands.spawn(FloorBundle::new((x as i32, y as i32), atlas.atlas.clone()));
+    let level = Level::new();
+    for tile in level.tiles.iter() {
+        match tile.1 {
+            Tile::Wall => {}
+            Tile::Floor => {
+                commands.spawn(FloorBundle::new((tile.0.x, tile.0.y), atlas.atlas.clone()));
             }
         }
     }

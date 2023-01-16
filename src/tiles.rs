@@ -61,7 +61,7 @@ pub struct FloorBundle {
 }
 
 impl FloorBundle {
-    pub fn new(location: (i32, i32), texture_atlas_handle: Handle<TextureAtlas>) -> FloorBundle {
+    pub fn new(location: (usize, usize), texture_atlas_handle: Handle<TextureAtlas>) -> FloorBundle {
         FloorBundle {
             sprite_sheet_bundle: SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
