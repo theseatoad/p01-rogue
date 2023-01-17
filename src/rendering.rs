@@ -46,7 +46,6 @@ fn update_camera_position(
 ) {
     for player_pos in player_query.iter() {
         let mut camera_transform = camera_query.single_mut();
-
         camera_transform.translation = Vec3::new(player_pos.x as f32 * TILESIZE as f32, player_pos.y as f32 * TILESIZE as f32, 999.0);
     }
 }

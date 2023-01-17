@@ -21,7 +21,7 @@ pub struct WallBundle {
 }
 
 impl WallBundle {
-    pub fn new(location: (i32, i32), texture_atlas_handle: Handle<TextureAtlas>) -> WallBundle {
+    pub fn new(location: (usize, usize), texture_atlas_handle: Handle<TextureAtlas>) -> WallBundle {
         WallBundle {
             sprite_sheet_bundle: SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
