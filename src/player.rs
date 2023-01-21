@@ -1,11 +1,11 @@
 use bevy::prelude::*;
-use map_gen_2d::{Point, Tile};
+use map_gen_2d::Point;
 
 use crate::{
-    components::Position,
+    components::{Position, POV, Mob},
     map::Level,
     resources::GlyphAssets,
-    tiles::{TileType, TILESIZE},
+    tiles::{TileType, TILESIZE, Tile},
 };
 
 #[derive(Component, Default, Debug)]
@@ -17,6 +17,8 @@ pub struct PlayerBundle {
     sprite_sheet_bundle: SpriteSheetBundle,
     player: Player,
     position: Position,
+    pov : POV,
+    mob : Mob
 }
 
 impl PlayerBundle {
@@ -48,6 +50,11 @@ impl PlayerBundle {
                 x: location.0,
                 y: location.1,
             },
+            pov : POV {
+                visible_tiles: Vec::new(),
+                range: 8,
+            },
+            mob : Mob
         }
     }
 }
@@ -71,7 +78,7 @@ fn movement(
     for mut player in player_query.iter_mut() {
         if keyboard_input.just_pressed(KeyCode::W) {
             match map.tiles.get(&Point::new(player.0.x as usize, player.0.y as usize + 1)) {
-                Some(Tile::Wall) => { //nothing
+                Some(Tile(TileType::WALL,_)) => { //nothing
                 }
                 _ => {
                     player.0.y += 1;
@@ -80,7 +87,7 @@ fn movement(
             }
         } else if keyboard_input.just_pressed(KeyCode::A) {
             match map.tiles.get(&Point::new(player.0.x as usize - 1, player.0.y as usize)) {
-                Some(Tile::Wall) => { //nothing
+                Some(Tile(TileType::WALL,_)) => { //nothing
                 }
                 _ => {
                     player.0.x -= 1;
@@ -89,7 +96,7 @@ fn movement(
             }
         } else if keyboard_input.just_pressed(KeyCode::S) {
             match map.tiles.get(&Point::new(player.0.x as usize, player.0.y as usize - 1)) {
-                Some(Tile::Wall) => { //nothing
+                Some(Tile(TileType::WALL,_)) => { //nothing
                 }
                 _ => {
                     player.0.y -= 1;
@@ -98,7 +105,7 @@ fn movement(
             }
         } else if keyboard_input.just_pressed(KeyCode::D) {
             match map.tiles.get(&Point::new(player.0.x as usize + 1, player.0.y as usize)) {
-                Some(Tile::Wall) => { //nothing
+                Some(Tile(TileType::WALL,_)) => { //nothing
                 }
                 _ => {
                     player.0.x += 1;

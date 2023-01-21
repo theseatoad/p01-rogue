@@ -9,7 +9,7 @@ pub enum TileType {
 }
 
 #[derive(Component)]
-pub struct Tile(TileType);
+pub struct Tile(pub TileType, pub Visible);
 
 #[derive(Bundle)]
 pub struct WallBundle {
@@ -17,7 +17,6 @@ pub struct WallBundle {
     sprite_sheet_bundle: SpriteSheetBundle,
     collision: Collision,
     tile: Tile,
-    visible : Visible
 }
 
 impl WallBundle {
@@ -45,8 +44,7 @@ impl WallBundle {
                 ..default()
             },
             collision: Collision,
-            tile: Tile(TileType::WALL),
-            visible : Visible
+            tile: Tile(TileType::WALL, Visible::new()),
         }
     }
 }
@@ -57,7 +55,6 @@ pub struct FloorBundle {
     #[bundle]
     sprite_sheet_bundle: SpriteSheetBundle,
     tile: Tile,
-    visible : Visible
 }
 
 impl FloorBundle {
@@ -84,8 +81,7 @@ impl FloorBundle {
                 },
                 ..default()
             },
-            tile: Tile(TileType::FLOOR),
-            visible : Visible
+            tile: Tile(TileType::WALL, Visible::new())
         }
     }
 }

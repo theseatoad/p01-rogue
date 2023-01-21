@@ -2,8 +2,8 @@
 // Updating lighting
 // Despawning tile under enemies and players
 use crate::{
-    components::{MainCamera, Position},
-    player::Player, tiles::TILESIZE,
+    components::{MainCamera, Position, Mob, POV},
+    player::Player, tiles::{TILESIZE, Tile},
 };
 use bevy::prelude::*;
 
@@ -21,20 +21,14 @@ impl Plugin for RenderingPlugin {
     }
 }
 
-// Despawn tile below player
+// Despawn tiles under mobs
 fn update_tile_vis(
-    player_query: Query<&Position, (Changed<Position>, With<Player>)>,
-    mut tile_query: Query<(&Position, &mut Visibility), Without<Player>>,
+    mob_query: Query<(&Position, &mut POV), (Changed<Position>, With<Mob>)>,
+    mut tile_query: Query<(&Position, &mut Visibility, &Tile), Without<Mob>>,
 ) {
 
-    for player_pos in player_query.iter() {
-        for mut tile in tile_query.iter_mut() {
-            if player_pos.x == tile.0.x && player_pos.y == tile.0.y {
-                tile.1.is_visible = false;
-            } else {
-                tile.1.is_visible = true;
-            }
-        }
+    for (position, mut pov) in mob_query.iter() {
+        
     }
 }
 
