@@ -8,6 +8,8 @@ pub enum TileType {
     FLOOR,
 }
 
+pub struct TileTypeMap(pub TileType);
+
 #[derive(Component)]
 pub struct Tile(pub TileType, pub Visible);
 
@@ -20,11 +22,12 @@ pub struct WallBundle {
 }
 
 impl WallBundle {
-    pub fn new(location: (usize, usize), texture_atlas_handle: Handle<TextureAtlas>) -> WallBundle {
+    pub fn new(location: (usize, usize), texture_atlas_handle: Handle<TextureAtlas>, color : Color) -> WallBundle {
         WallBundle {
             sprite_sheet_bundle: SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
                     index: 35,
+                    color : color,
                     ..default()
                 },
                 texture_atlas: texture_atlas_handle,
@@ -58,7 +61,7 @@ pub struct FloorBundle {
 }
 
 impl FloorBundle {
-    pub fn new(location: (usize, usize), texture_atlas_handle: Handle<TextureAtlas>) -> FloorBundle {
+    pub fn new(location: (usize, usize), texture_atlas_handle: Handle<TextureAtlas>, color : Color) -> FloorBundle {
         FloorBundle {
             sprite_sheet_bundle: SpriteSheetBundle {
                 sprite: TextureAtlasSprite {

@@ -5,7 +5,7 @@ use crate::{
     components::{Position, POV, Mob},
     map::Level,
     resources::GlyphAssets,
-    tiles::{TileType, TILESIZE, Tile},
+    tiles::{TileType, TILESIZE, TileTypeMap},
 };
 
 #[derive(Component, Default, Debug)]
@@ -51,7 +51,8 @@ impl PlayerBundle {
                 y: location.1,
             },
             pov : POV {
-                visible_tiles: Vec::new(),
+                visible_tiles : Vec::new(),
+                newly_revealed_tiles : Vec::new(),
                 range: 8,
             },
             mob : Mob
@@ -78,7 +79,7 @@ fn movement(
     for mut player in player_query.iter_mut() {
         if keyboard_input.just_pressed(KeyCode::W) {
             match map.tiles.get(&Point::new(player.0.x as usize, player.0.y as usize + 1)) {
-                Some(Tile(TileType::WALL,_)) => { //nothing
+                Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
                     player.0.y += 1;
@@ -87,7 +88,7 @@ fn movement(
             }
         } else if keyboard_input.just_pressed(KeyCode::A) {
             match map.tiles.get(&Point::new(player.0.x as usize - 1, player.0.y as usize)) {
-                Some(Tile(TileType::WALL,_)) => { //nothing
+                Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
                     player.0.x -= 1;
@@ -96,7 +97,7 @@ fn movement(
             }
         } else if keyboard_input.just_pressed(KeyCode::S) {
             match map.tiles.get(&Point::new(player.0.x as usize, player.0.y as usize - 1)) {
-                Some(Tile(TileType::WALL,_)) => { //nothing
+                Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
                     player.0.y -= 1;
@@ -105,7 +106,7 @@ fn movement(
             }
         } else if keyboard_input.just_pressed(KeyCode::D) {
             match map.tiles.get(&Point::new(player.0.x as usize + 1, player.0.y as usize)) {
-                Some(Tile(TileType::WALL,_)) => { //nothing
+                Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
                     player.0.x += 1;
