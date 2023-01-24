@@ -75,24 +75,24 @@ fn update_tiles(
         }
         // Spawn lit tiles
         for tile in player.1.visible_tiles.iter() {
-            let color : Color;
+            let color: Color;
             // HARD CODE LIGHT LEVEL TO COLOR
             if tile.1 == 0 {
                 color = Color::rgb(1.0, 1.0, 0.0);
             } else if tile.1 == 1 {
-                color = Color::rgb(1.0 - (0.1  * 1.0), 1.0 - (0.1  * 1.0), 0.0 + (0.05 * 1.0));
-            }else if tile.1 == 2 {
-                color = Color::rgb(1.0 - (0.1  * 1.0), 1.0 - (0.1  * 1.0), 0.0 + (0.05 * 1.0));
-            }else if tile.1 == 3 {
-                color = Color::rgb(1.0 - (0.1  * 3.0), 1.0 - (0.1  * 3.0), 0.0 + (0.05 * 3.0));
-            }else if tile.1 == 4 {
-                color = Color::rgb(1.0 - (0.1  * 3.0), 1.0 - (0.1  * 3.0), 0.0 + (0.05 * 3.0));
-            }else if tile.1 == 5 {
-                color = Color::rgb(1.0 - (0.1  * 5.0), 1.0 - (0.1  * 5.0), 0.0 + (0.05 * 5.0));
+                color = Color::rgb(1.0, 1.0, 0.0);
+            } else if tile.1 == 2 {
+                color = Color::rgb(1.0, 1.0, 0.0);
+            } else if tile.1 == 3 {
+                color = Color::rgb(1.0 - (0.1 * 3.0), 1.0 - (0.1 * 3.0), 0.0 + (0.05 * 3.0));
+            } else if tile.1 == 4 {
+                color = Color::rgb(1.0 - (0.1 * 3.0), 1.0 - (0.1 * 3.0), 0.0 + (0.05 * 3.0));
+            } else if tile.1 == 5 {
+                color = Color::rgb(1.0 - (0.1 * 5.0), 1.0 - (0.1 * 5.0), 0.0 + (0.05 * 5.0));
             } else if tile.1 == 6 {
-                color = Color::rgb(1.0 - (0.1  * 5.0), 1.0 - (0.1  * 5.0), 0.0 + (0.05 * 5.0));
+                color = Color::rgb(1.0 - (0.1 * 5.0), 1.0 - (0.1 * 5.0), 0.0 + (0.05 * 5.0));
             } else {
-                color = Color::rgb(1.0 - (0.1  * 7.0), 1.0 - (0.1  * 7.0), 0.0 + (0.05 * 7.0));
+                color = Color::rgb(1.0 - (0.1 * 5.0), 1.0 - (0.1 * 5.0), 0.0 + (0.05 * 5.0));
             }
             match map.tiles.get(&Point {
                 x: tile.0.x as usize,
@@ -112,7 +112,7 @@ fn update_tiles(
                         .spawn(FloorBundle::new(
                             (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
                             atlas.atlas.clone(),
-                            color
+                            color,
                         ))
                         .insert(LitTile);
                 }
@@ -196,17 +196,6 @@ fn bresenham_line_enhanced_high(
             return Some(distance);
         }
     }
-    // If we were passed a wall, obivously we can see the wall so pass Some(distance)
-    if let Some(tile) = map.tiles.get(&Point {
-        x: tile_position.0.try_into().unwrap(),
-        y: tile_position.1.try_into().unwrap(),
-    }) {
-        if tile.0 == TileType::WALL {
-            let distance =
-                (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
-            return Some(distance);
-        }
-    }
     // Algorithm
     let mut dx: i32 = tile_position.0 - position.0;
     let dy: i32 = tile_position.1 - position.1;
@@ -223,9 +212,19 @@ fn bresenham_line_enhanced_high(
             x: x.try_into().unwrap(),
             y: y.try_into().unwrap(),
         }) {
-            if tile.0 == TileType::WALL {
+            if tile.0 == TileType::WALL && x == tile_position.0 && y == tile_position.1 {
+                let distance =
+                    (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+                return Some(distance);
+            } else if tile.0 == TileType::WALL && x == position.0 && y == position.1 {
+                let distance =
+                    (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+                return Some(distance);
+            } else if tile.0 == TileType::WALL {
                 return None;
             }
+        } else {
+            return None;
         }
         // Progress algorithm
         if d > 0 {
@@ -260,17 +259,6 @@ fn bresenham_line_enhanced_low(
             return Some(distance);
         }
     }
-    // If we were passed a wall, obivously we can see the wall so pass Some(distance)
-    if let Some(tile) = map.tiles.get(&Point {
-        x: tile_position.0.try_into().unwrap(),
-        y: tile_position.1.try_into().unwrap(),
-    }) {
-        if tile.0 == TileType::WALL {
-            let distance =
-                (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
-            return Some(distance);
-        }
-    }
     let dx: i32 = tile_position.0 - position.0;
     let mut dy: i32 = tile_position.1 - position.1;
     let mut yi: i32 = 1;
@@ -281,14 +269,23 @@ fn bresenham_line_enhanced_low(
     let mut d: i32 = (2 * dy) - dx;
     let mut y: i32 = position.1;
     for x in position.0..=tile_position.0 {
-        // If this is a wall, we can not see the next tile.
         if let Some(tile) = map.tiles.get(&Point {
             x: x.try_into().unwrap(),
             y: y.try_into().unwrap(),
         }) {
-            if tile.0 == TileType::WALL {
+            if tile.0 == TileType::WALL && x == tile_position.0 && y == tile_position.1 {
+                let distance =
+                    (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+                return Some(distance);
+            } else if tile.0 == TileType::WALL && x == position.0 && y == position.1 {
+                let distance =
+                    (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+                return Some(distance);
+            } else if tile.0 == TileType::WALL {
                 return None;
             }
+        } else {
+            return None;
         }
         // Progress algorithm
         if d > 0 {
