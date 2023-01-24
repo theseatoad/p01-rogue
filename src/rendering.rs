@@ -75,6 +75,25 @@ fn update_tiles(
         }
         // Spawn lit tiles
         for tile in player.1.visible_tiles.iter() {
+            let color : Color;
+            // HARD CODE LIGHT LEVEL TO COLOR
+            if tile.1 == 0 {
+                color = Color::rgb(1.0, 1.0, 0.0);
+            } else if tile.1 == 1 {
+                color = Color::rgb(1.0 - (0.1  * 1.0), 1.0 - (0.1  * 1.0), 0.0 + (0.05 * 1.0));
+            }else if tile.1 == 2 {
+                color = Color::rgb(1.0 - (0.1  * 1.0), 1.0 - (0.1  * 1.0), 0.0 + (0.05 * 1.0));
+            }else if tile.1 == 3 {
+                color = Color::rgb(1.0 - (0.1  * 3.0), 1.0 - (0.1  * 3.0), 0.0 + (0.05 * 3.0));
+            }else if tile.1 == 4 {
+                color = Color::rgb(1.0 - (0.1  * 3.0), 1.0 - (0.1  * 3.0), 0.0 + (0.05 * 3.0));
+            }else if tile.1 == 5 {
+                color = Color::rgb(1.0 - (0.1  * 5.0), 1.0 - (0.1  * 5.0), 0.0 + (0.05 * 5.0));
+            } else if tile.1 == 6 {
+                color = Color::rgb(1.0 - (0.1  * 5.0), 1.0 - (0.1  * 5.0), 0.0 + (0.05 * 5.0));
+            } else {
+                color = Color::rgb(1.0 - (0.1  * 7.0), 1.0 - (0.1  * 7.0), 0.0 + (0.05 * 7.0));
+            }
             match map.tiles.get(&Point {
                 x: tile.0.x as usize,
                 y: tile.0.y as usize,
@@ -84,7 +103,7 @@ fn update_tiles(
                         .spawn(WallBundle::new(
                             (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
                             atlas.atlas.clone(),
-                            Color::WHITE,
+                            color,
                         ))
                         .insert(LitTile);
                 }
@@ -93,7 +112,7 @@ fn update_tiles(
                         .spawn(FloorBundle::new(
                             (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
                             atlas.atlas.clone(),
-                            Color::WHITE,
+                            color
                         ))
                         .insert(LitTile);
                 }

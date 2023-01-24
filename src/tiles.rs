@@ -66,6 +66,7 @@ impl FloorBundle {
             sprite_sheet_bundle: SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
                     index: 250,
+                    color : color,
                     ..default()
                 },
                 texture_atlas: texture_atlas_handle,
