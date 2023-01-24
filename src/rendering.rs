@@ -38,10 +38,10 @@ fn update_tile_vis_and_explore(
         // loop over an range x range loop centered around player.
         for x in (position.x - pov.range)..(position.x + pov.range) {
             for y in (position.y - pov.range)..(position.y + pov.range) {
-                if let Some(l) =
-                    bresenham_line_enhanced(&(position.x, position.y), &(x, y), &pov.range, &map)
+                if let Some(light) =
+                    bresenham_line_enhanced(&(position.x, position.y), &(x, y), &map)
                 {
-                    pov.visible_tiles.push((Position { x, y }, l));
+                    pov.visible_tiles.push((Position { x, y }, light));
                     if map.revealed_tiles.insert(Point {
                         x: x as usize,
                         y: y as usize,
@@ -73,7 +73,6 @@ fn update_tiles(
             // Despawn all lit-tiles
             commands.entity(entity.0).despawn();
         }
-
         // Spawn lit tiles
         for tile in player.1.visible_tiles.iter() {
             match map.tiles.get(&Point {
@@ -85,7 +84,7 @@ fn update_tiles(
                         .spawn(WallBundle::new(
                             (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
                             atlas.atlas.clone(),
-                            Color::WHITE
+                            Color::WHITE,
                         ))
                         .insert(LitTile);
                 }
@@ -94,7 +93,7 @@ fn update_tiles(
                         .spawn(FloorBundle::new(
                             (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
                             atlas.atlas.clone(),
-                            Color::WHITE
+                            Color::WHITE,
                         ))
                         .insert(LitTile);
                 }
@@ -111,20 +110,18 @@ fn update_tiles(
                 y: tile.y as usize,
             }) {
                 Some(TileTypeMap(TileType::WALL)) => {
-                    commands
-                        .spawn(WallBundle::new(
-                            (tile.x.try_into().unwrap(), tile.y.try_into().unwrap()),
-                            atlas.atlas.clone(),
-                             Color::GRAY
-                        ));
+                    commands.spawn(WallBundle::new(
+                        (tile.x.try_into().unwrap(), tile.y.try_into().unwrap()),
+                        atlas.atlas.clone(),
+                        Color::GRAY,
+                    ));
                 }
                 Some(TileTypeMap(TileType::FLOOR)) => {
-                    commands
-                        .spawn(FloorBundle::new(
-                            (tile.x.try_into().unwrap(), tile.y.try_into().unwrap()),
-                            atlas.atlas.clone(),
-                            Color::GRAY
-                        ));
+                    commands.spawn(FloorBundle::new(
+                        (tile.x.try_into().unwrap(), tile.y.try_into().unwrap()),
+                        atlas.atlas.clone(),
+                        Color::GRAY,
+                    ));
                 }
                 None => {
                     //nothing
@@ -137,17 +134,154 @@ fn update_tiles(
 // Returns none if line is out of range / not visible
 // Returns some(i32) where i32 is light level
 // https://sites.google.com/site/jicenospam/visibilitydetermination
+// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm#Algorithm_for_integer_arithmetic
 fn bresenham_line_enhanced(
     position: &(i32, i32),
     tile_position: &(i32, i32),
-    range: &i32,
     map: &Level,
 ) -> Option<i32> {
-    let distance = (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
-    if range > &distance {
-        return Some(1);
+    // position = (x0,y0) and tile_position = (x1,y1)
+
+    if (tile_position.1 - position.1).abs() < (tile_position.0 - position.0) {
+        if position.0 > tile_position.0 {
+            return bresenham_line_enhanced_low(tile_position, position, map);
+        } else {
+            return bresenham_line_enhanced_low(position, tile_position, map);
+        }
+    } else {
+        if position.1 > tile_position.1 {
+            return bresenham_line_enhanced_high(tile_position, position, map);
+        } else {
+            return bresenham_line_enhanced_high(position, tile_position, map);
+        }
     }
-    None
+}
+
+fn bresenham_line_enhanced_high(
+    position: &(i32, i32),
+    tile_position: &(i32, i32),
+    map: &Level,
+) -> Option<i32> {
+    // Make sure all positions are positive
+    if position.0 < 0 || position.1 < 0 || tile_position.0 < 0 || tile_position.1 < 0 {
+        return None;
+    }
+    // If we were passed a wall, obivously we can see the wall so pass Some(distance)
+    if let Some(tile) = map.tiles.get(&Point {
+        x: position.0.try_into().unwrap(),
+        y: position.1.try_into().unwrap(),
+    }) {
+        if tile.0 == TileType::WALL {
+            let distance =
+                (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+            return Some(distance);
+        }
+    }
+    // If we were passed a wall, obivously we can see the wall so pass Some(distance)
+    if let Some(tile) = map.tiles.get(&Point {
+        x: tile_position.0.try_into().unwrap(),
+        y: tile_position.1.try_into().unwrap(),
+    }) {
+        if tile.0 == TileType::WALL {
+            let distance =
+                (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+            return Some(distance);
+        }
+    }
+    // Algorithm
+    let mut dx: i32 = tile_position.0 - position.0;
+    let dy: i32 = tile_position.1 - position.1;
+    let mut xi: i32 = 1;
+    if dx < 0 {
+        xi = -1;
+        dx = -dx
+    }
+    let mut d: i32 = (2 * dx) - dy;
+    let mut x: i32 = position.0;
+    for y in position.1..=tile_position.1 {
+        // If this is a wall, we can not see the next tile.
+        if let Some(tile) = map.tiles.get(&Point {
+            x: x.try_into().unwrap(),
+            y: y.try_into().unwrap(),
+        }) {
+            if tile.0 == TileType::WALL {
+                return None;
+            }
+        }
+        // Progress algorithm
+        if d > 0 {
+            x = x + xi;
+            d = d + (2 * (dx - dy))
+        } else {
+            d = d + 2 * dx;
+        }
+    }
+    // If we have gotten here, we have succesfully reached the tile.
+    let distance = (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+    Some(distance)
+}
+
+fn bresenham_line_enhanced_low(
+    position: &(i32, i32),
+    tile_position: &(i32, i32),
+    map: &Level,
+) -> Option<i32> {
+    // Make sure all positions are postive
+    if position.0 < 0 || position.1 < 0 || tile_position.0 < 0 || tile_position.1 < 0 {
+        return None;
+    }
+    // If we were passed a wall, obivously we can see the wall so pass Some(distance)
+    if let Some(tile) = map.tiles.get(&Point {
+        x: position.0.try_into().unwrap(),
+        y: position.1.try_into().unwrap(),
+    }) {
+        if tile.0 == TileType::WALL {
+            let distance =
+                (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+            return Some(distance);
+        }
+    }
+    // If we were passed a wall, obivously we can see the wall so pass Some(distance)
+    if let Some(tile) = map.tiles.get(&Point {
+        x: tile_position.0.try_into().unwrap(),
+        y: tile_position.1.try_into().unwrap(),
+    }) {
+        if tile.0 == TileType::WALL {
+            let distance =
+                (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+            return Some(distance);
+        }
+    }
+    let dx: i32 = tile_position.0 - position.0;
+    let mut dy: i32 = tile_position.1 - position.1;
+    let mut yi: i32 = 1;
+    if dy < 0 {
+        yi = -1;
+        dy = -dy
+    }
+    let mut d: i32 = (2 * dy) - dx;
+    let mut y: i32 = position.1;
+    for x in position.0..=tile_position.0 {
+        // If this is a wall, we can not see the next tile.
+        if let Some(tile) = map.tiles.get(&Point {
+            x: x.try_into().unwrap(),
+            y: y.try_into().unwrap(),
+        }) {
+            if tile.0 == TileType::WALL {
+                return None;
+            }
+        }
+        // Progress algorithm
+        if d > 0 {
+            y = y + yi;
+            d = d + (2 * (dy - dx))
+        } else {
+            d = d + 2 * dy;
+        }
+    }
+    // If we have gotten here, we have succesfully reached the tile.
+    let distance = (position.0 - tile_position.0).abs() + (position.1 - tile_position.1).abs();
+    Some(distance)
 }
 
 fn update_camera_position(
