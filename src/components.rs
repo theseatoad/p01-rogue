@@ -1,7 +1,4 @@
 use bevy::prelude::*;
-
-use crate::tiles::TileTypeMap;
-
 #[derive(Component, Copy, Clone)]
 pub struct Position {
     pub x: i32,
@@ -12,25 +9,6 @@ pub struct Collision;
 
 #[derive(Component)]
 pub struct MainCamera;
-
-#[derive(Component)]
-pub struct Visible(VisibleTypes, ExploreTypes);
-
-impl Visible {
-    pub fn new() -> Visible {
-        Visible(VisibleTypes::NotVisible, ExploreTypes::Unexplored)
-    }
-}
-
-pub enum VisibleTypes {
-    NotVisible,
-    Visible,
-}
-
-pub enum ExploreTypes {
-    Unexplored,
-    Explored
-}
 
 #[derive(Component)]
 pub struct POV {
@@ -48,3 +26,10 @@ pub struct Mob;
 /// Represents a lit tile
 #[derive(Component)]
 pub struct LitTile;
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum MobType {
+    PLAYER,
+    GOBLIN,
+    ORC
+}

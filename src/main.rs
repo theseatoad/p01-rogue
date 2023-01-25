@@ -11,6 +11,7 @@ mod rendering;
 mod resources;
 mod tiles;
 mod utils;
+mod enemies;
 //bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 fn main() {

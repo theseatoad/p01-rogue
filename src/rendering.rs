@@ -6,7 +6,7 @@ use crate::{
     map::Level,
     player::Player,
     resources::GlyphAssets,
-    tiles::{FloorBundle, Tile, TileType, TileTypeMap, WallBundle, TILESIZE},
+    tiles::{FloorBundle, TileType, TileTypeMap, WallBundle, TILESIZE},
 };
 use bevy::prelude::*;
 use map_gen_2d::Point;
@@ -19,8 +19,8 @@ impl Plugin for RenderingPlugin {
             CoreStage::PostUpdate,
             SystemSet::new()
                 .with_system(update_camera_position)
-                .with_system(update_tile_vis_and_explore)
-                .with_system(update_tiles),
+                .with_system(update_tile_vis_and_explore.after(update_camera_position))
+                .with_system(update_tiles.after(update_tile_vis_and_explore)),
         );
     }
 }

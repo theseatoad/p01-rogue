@@ -2,10 +2,10 @@ use bevy::prelude::*;
 use map_gen_2d::Point;
 
 use crate::{
-    components::{Position, POV, Mob},
+    components::{Mob, Position, POV, MobType},
     map::Level,
     resources::GlyphAssets,
-    tiles::{TileType, TILESIZE, TileTypeMap},
+    tiles::{TileType, TileTypeMap, TILESIZE},
 };
 
 #[derive(Component, Default, Debug)]
@@ -17,8 +17,8 @@ pub struct PlayerBundle {
     sprite_sheet_bundle: SpriteSheetBundle,
     player: Player,
     position: Position,
-    pov : POV,
-    mob : Mob
+    pov: POV,
+    mob: Mob,
 }
 
 impl PlayerBundle {
@@ -50,12 +50,12 @@ impl PlayerBundle {
                 x: location.0,
                 y: location.1,
             },
-            pov : POV {
-                visible_tiles : Vec::new(),
-                newly_revealed_tiles : Vec::new(),
+            pov: POV {
+                visible_tiles: Vec::new(),
+                newly_revealed_tiles: Vec::new(),
                 range: 8,
             },
-            mob : Mob
+            mob: Mob,
         }
     }
 }
@@ -67,8 +67,12 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-fn setup(mut commands: Commands, atlas: Res<GlyphAssets>) {
-    commands.spawn(PlayerBundle::new((1, 1), atlas.atlas.clone()));
+fn setup(mut commands: Commands, atlas: Res<GlyphAssets>, map: Res<Level>) {
+    for mob in map.mobs.iter() {
+        if mob.1 == MobType::PLAYER {
+            commands.spawn(PlayerBundle::new((mob.0.x.try_into().unwrap(), mob.0.y.try_into().unwrap()), atlas.atlas.clone()));
+        }
+    };
 }
 
 fn movement(
@@ -78,7 +82,10 @@ fn movement(
 ) {
     for mut player in player_query.iter_mut() {
         if keyboard_input.just_pressed(KeyCode::W) {
-            match map.tiles.get(&Point::new(player.0.x as usize, player.0.y as usize + 1)) {
+            match map
+                .tiles
+                .get(&Point::new(player.0.x as usize, player.0.y as usize + 1))
+            {
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
@@ -87,7 +94,10 @@ fn movement(
                 }
             }
         } else if keyboard_input.just_pressed(KeyCode::A) {
-            match map.tiles.get(&Point::new(player.0.x as usize - 1, player.0.y as usize)) {
+            match map
+                .tiles
+                .get(&Point::new(player.0.x as usize - 1, player.0.y as usize))
+            {
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
@@ -96,7 +106,10 @@ fn movement(
                 }
             }
         } else if keyboard_input.just_pressed(KeyCode::S) {
-            match map.tiles.get(&Point::new(player.0.x as usize, player.0.y as usize - 1)) {
+            match map
+                .tiles
+                .get(&Point::new(player.0.x as usize, player.0.y as usize - 1))
+            {
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
@@ -105,7 +118,10 @@ fn movement(
                 }
             }
         } else if keyboard_input.just_pressed(KeyCode::D) {
-            match map.tiles.get(&Point::new(player.0.x as usize + 1, player.0.y as usize)) {
+            match map
+                .tiles
+                .get(&Point::new(player.0.x as usize + 1, player.0.y as usize))
+            {
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
