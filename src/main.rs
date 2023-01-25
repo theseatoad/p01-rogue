@@ -1,5 +1,6 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
 use components::MainCamera;
+use enemies::EnemyPlugin;
 use map::MapPlugin;
 use player::PlayerPlugin;
 use rendering::{RenderingPlugin, WINDOWSIZE};
@@ -34,6 +35,7 @@ fn main() {
         .add_startup_system(setup.at_start())
         .add_plugin(MapPlugin)
         .add_plugin(PlayerPlugin)
+        .add_plugin(EnemyPlugin)
         .add_plugin(RenderingPlugin)
         .run();
 }
