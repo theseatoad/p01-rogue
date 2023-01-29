@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{components::{Position, POV, Mob, MobType}, tiles::TILESIZE, resources::GlyphAssets, map::Level, player::Player, health::Health};
+use crate::{components::{Position, POV, Mob, MobType}, tiles::TILESIZE, resources::GlyphAssets, map::Level, health::Health};
 
 #[derive(Component, Default, Debug)]
 pub struct Enemy;
@@ -134,13 +134,4 @@ fn setup(mut commands: Commands, atlas: Res<GlyphAssets>, map: Res<Level>) {
             commands.spawn(GoblinBundle::new((mob.0.x.try_into().unwrap(), mob.0.y.try_into().unwrap()), atlas.atlas.clone()));
         }
     };
-}
-
-fn movement(
-    mut commands: Commands,
-    enemy_query: Query<(&mut Position, &POV, With<Enemy>)>,
-    player_query: Query<&Position, (Changed<Position>, With<Player>)>,
-    map: Res<Level>,
-) {
-
 }

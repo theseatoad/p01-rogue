@@ -20,7 +20,6 @@ fn check_health_to_despawn(
 ) {
     for mob in health_query.iter() {
         if mob.1.0 <= 0 {
-            println!("Mob health is now: {}", mob.1.0);
             commands.entity(mob.0).despawn();
         }
     }

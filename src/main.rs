@@ -7,15 +7,18 @@ use player::PlayerPlugin;
 use rendering::{RenderingPlugin, WINDOWSIZE};
 use resources::GlyphAssets;
 mod components;
+mod enemies;
+mod health;
 mod map;
 mod player;
 mod rendering;
 mod resources;
 mod tiles;
-mod enemies;
-mod health;
 
 fn main() {
+    // When building for WASM, print panics to the browser console
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
     App::new()
         .add_plugins(
             DefaultPlugins
