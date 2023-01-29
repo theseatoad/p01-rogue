@@ -98,7 +98,6 @@ fn movement(
                     for mut mob in mob_query.iter_mut() {
                         if mob.0.x == player.0.x && mob.0.y == player.0.y + 1 {
                             // Attack mob
-                            println!("Attack {:?}", mob.1 .0);
                             is_attack = true;
                             mob.2.0 = mob.2.0 - 1;
                             break;
@@ -122,7 +121,6 @@ fn movement(
                     for mut mob in mob_query.iter_mut() {
                         if mob.0.x == player.0.x - 1 && mob.0.y == player.0.y {
                             // Attack mob
-                            println!("Attack {:?}", mob.1 .0);
                             is_attack = true;
                             mob.2.0 = mob.2.0 - 1;
                             break;
@@ -146,7 +144,6 @@ fn movement(
                     for mut mob in mob_query.iter_mut() {
                         if mob.0.x == player.0.x && mob.0.y == player.0.y - 1 {
                             // Attack mob
-                            println!("Attack {:?}", mob.1.0);
                             is_attack = true;
                             mob.2.0 = mob.2.0 - 1;
                             break;
@@ -170,7 +167,6 @@ fn movement(
                     for mut mob in mob_query.iter_mut() {
                         if mob.0.x == player.0.x + 1 && mob.0.y == player.0.y {
                             // Attack mob
-                            println!("Attack {:?}", mob.1.0);
                             mob.2.0 = mob.2.0 - 1;
                             is_attack = true;
                             break;

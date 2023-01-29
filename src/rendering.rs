@@ -2,7 +2,7 @@
 // Updating lighting
 // Despawning tile under enemies and players
 use crate::{
-    components::{LitTile, MainCamera, Mob, Position, POV, MobType},
+    components::{LitTile, MainCamera, Mob, MobType, Position, POV},
     map::Level,
     player::Player,
     resources::GlyphAssets,
@@ -20,12 +20,12 @@ impl Plugin for RenderingPlugin {
             SystemSet::new()
                 .with_system(update_camera_position)
                 .with_system(update_tile_vis_and_explore.after(update_camera_position))
-                .with_system(update_tiles.after(update_tile_vis_and_explore)),
+                .with_system(update_tiles.after(update_tile_vis_and_explore))
+                .with_system(update_mob_vis.after(update_tiles)),
         );
     }
 }
 
-// Despawn tiles under mobs
 fn update_tile_vis_and_explore(
     mut mob_query: Query<(&Position, &mut POV, &Mob), (Changed<Position>, With<Mob>)>,
     mut map: ResMut<Level>,
@@ -43,10 +43,11 @@ fn update_tile_vis_and_explore(
                 {
                     pov.visible_tiles.push((Position { x, y }, light));
 
-                    if mob.0 == MobType::PLAYER && map.revealed_tiles.insert(Point {
-                        x: x as usize,
-                        y: y as usize,
-                    }) == true
+                    if mob.0 == MobType::PLAYER
+                        && map.revealed_tiles.insert(Point {
+                            x: x as usize,
+                            y: y as usize,
+                        }) == true
                     {
                         pov.newly_revealed_tiles.push(Position { x, y })
                     }
@@ -67,6 +68,7 @@ fn update_tiles(
     atlas: Res<GlyphAssets>,
     tile_query: Query<(Entity, With<LitTile>)>,
     player_query: Query<(&Position, &POV), (Changed<Position>, With<Player>)>,
+    mob_query: Query<&Position, With<Mob>>,
     map: Res<Level>,
 ) {
     for player in player_query.iter() {
@@ -95,30 +97,36 @@ fn update_tiles(
             } else {
                 color = Color::rgb(1.0 - (0.1 * 5.0), 1.0 - (0.1 * 5.0), 0.0 + (0.05 * 5.0));
             }
-            match map.tiles.get(&Point {
-                x: tile.0.x as usize,
-                y: tile.0.y as usize,
-            }) {
-                Some(TileTypeMap(TileType::WALL)) => {
-                    commands
-                        .spawn(WallBundle::new(
-                            (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
-                            atlas.atlas.clone(),
-                            color,
-                        ))
-                        .insert(LitTile);
-                }
-                Some(TileTypeMap(TileType::FLOOR)) => {
-                    commands
-                        .spawn(FloorBundle::new(
-                            (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
-                            atlas.atlas.clone(),
-                            color,
-                        ))
-                        .insert(LitTile);
-                }
-                None => {
-                    //nothing
+            // Make sure we do not spawn tiles underneath mob or player
+            if mob_query
+                .iter()
+                .any(|&mob| mob.x != tile.0.x && mob.y != tile.0.y)
+            {
+                match map.tiles.get(&Point {
+                    x: tile.0.x as usize,
+                    y: tile.0.y as usize,
+                }) {
+                    Some(TileTypeMap(TileType::WALL)) => {
+                        commands
+                            .spawn(WallBundle::new(
+                                (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
+                                atlas.atlas.clone(),
+                                color,
+                            ))
+                            .insert(LitTile);
+                    }
+                    Some(TileTypeMap(TileType::FLOOR)) => {
+                        commands
+                            .spawn(FloorBundle::new(
+                                (tile.0.x.try_into().unwrap(), tile.0.y.try_into().unwrap()),
+                                atlas.atlas.clone(),
+                                color,
+                            ))
+                            .insert(LitTile);
+                    }
+                    None => {
+                        //nothing
+                    }
                 }
             }
         }
@@ -146,6 +154,21 @@ fn update_tiles(
                 None => {
                     //nothing
                 }
+            }
+        }
+    }
+}
+
+fn update_mob_vis(
+    player_query: Query<(&Position, &POV), (Changed<Position>, With<Player>)>,
+    mut mob_query: Query<(&Position, &mut TextureAtlasSprite), (With<Mob>, Without<Player>)>,
+) {
+    for player in player_query.iter() {
+        for mut mob in mob_query.iter_mut() {
+            if player.1.visible_tiles.iter().any(|&tile| tile.0 == *mob.0) {
+                mob.1.color.set_a(1.0);
+            } else {
+                mob.1.color.set_a(0.0);
             }
         }
     }

@@ -12,7 +12,6 @@ mod player;
 mod rendering;
 mod resources;
 mod tiles;
-mod utils;
 mod enemies;
 mod health;
 

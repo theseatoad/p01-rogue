@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    components::{Mob, MobType, Position},
-    player::Player,
+    components::Mob,
 };
 
 #[derive(Component)]

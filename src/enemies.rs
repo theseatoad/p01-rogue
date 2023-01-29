@@ -40,6 +40,7 @@ impl OrcBundle {
                 },
                 sprite: TextureAtlasSprite {
                     index: 111,
+                    color : Color::RED,
                     ..default()
                 },
                 ..default()
@@ -96,6 +97,7 @@ impl GoblinBundle {
                 },
                 sprite: TextureAtlasSprite {
                     index: 103,
+                    color : Color::RED,
                     ..default()
                 },
                 ..default()
