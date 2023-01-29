@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use map_gen_2d::Point;
 
 use crate::{
-    components::{Mob, Position, POV, MobType},
+    components::{Mob, MobType, Position, POV},
+    health::Health,
     map::Level,
     resources::GlyphAssets,
     tiles::{TileType, TileTypeMap, TILESIZE},
@@ -55,7 +56,7 @@ impl PlayerBundle {
                 newly_revealed_tiles: Vec::new(),
                 range: 8,
             },
-            mob: Mob,
+            mob: Mob(MobType::PLAYER),
         }
     }
 }
@@ -70,15 +71,19 @@ impl Plugin for PlayerPlugin {
 fn setup(mut commands: Commands, atlas: Res<GlyphAssets>, map: Res<Level>) {
     for mob in map.mobs.iter() {
         if mob.1 == MobType::PLAYER {
-            commands.spawn(PlayerBundle::new((mob.0.x.try_into().unwrap(), mob.0.y.try_into().unwrap()), atlas.atlas.clone()));
+            commands.spawn(PlayerBundle::new(
+                (mob.0.x.try_into().unwrap(), mob.0.y.try_into().unwrap()),
+                atlas.atlas.clone(),
+            ));
         }
-    };
+    }
 }
 
 fn movement(
     mut player_query: Query<(&mut Position, &mut Transform), With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     map: Res<Level>,
+    mut mob_query: Query<(&Position, &Mob, &mut Health), Without<Player>>,
 ) {
     for mut player in player_query.iter_mut() {
         if keyboard_input.just_pressed(KeyCode::W) {
@@ -89,8 +94,20 @@ fn movement(
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
-                    player.0.y += 1;
-                    player.1.translation.y += 1.0 * TILESIZE as f32;
+                    let mut is_attack = false;
+                    for mut mob in mob_query.iter_mut() {
+                        if mob.0.x == player.0.x && mob.0.y == player.0.y + 1 {
+                            // Attack mob
+                            println!("Attack {:?}", mob.1 .0);
+                            is_attack = true;
+                            mob.2.0 = mob.2.0 - 1;
+                            break;
+                        }
+                    }
+                    if !is_attack {
+                        player.0.y += 1;
+                        player.1.translation.y += 1.0 * TILESIZE as f32;
+                    }
                 }
             }
         } else if keyboard_input.just_pressed(KeyCode::A) {
@@ -101,8 +118,20 @@ fn movement(
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
-                    player.0.x -= 1;
-                    player.1.translation.x -= 1.0 * TILESIZE as f32;
+                    let mut is_attack = false;
+                    for mut mob in mob_query.iter_mut() {
+                        if mob.0.x == player.0.x - 1 && mob.0.y == player.0.y {
+                            // Attack mob
+                            println!("Attack {:?}", mob.1 .0);
+                            is_attack = true;
+                            mob.2.0 = mob.2.0 - 1;
+                            break;
+                        }
+                    }
+                    if !is_attack {
+                        player.0.x -= 1;
+                        player.1.translation.x -= 1.0 * TILESIZE as f32;
+                    }
                 }
             }
         } else if keyboard_input.just_pressed(KeyCode::S) {
@@ -113,8 +142,20 @@ fn movement(
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
-                    player.0.y -= 1;
-                    player.1.translation.y -= 1.0 * TILESIZE as f32;
+                    let mut is_attack = false;
+                    for mut mob in mob_query.iter_mut() {
+                        if mob.0.x == player.0.x && mob.0.y == player.0.y - 1 {
+                            // Attack mob
+                            println!("Attack {:?}", mob.1.0);
+                            is_attack = true;
+                            mob.2.0 = mob.2.0 - 1;
+                            break;
+                        }
+                    }
+                    if !is_attack {
+                        player.0.y -= 1;
+                        player.1.translation.y -= 1.0 * TILESIZE as f32;
+                    }
                 }
             }
         } else if keyboard_input.just_pressed(KeyCode::D) {
@@ -125,8 +166,20 @@ fn movement(
                 Some(TileTypeMap(TileType::WALL)) => { //nothing
                 }
                 _ => {
-                    player.0.x += 1;
-                    player.1.translation.x += 1.0 * TILESIZE as f32;
+                    let mut is_attack = false;
+                    for mut mob in mob_query.iter_mut() {
+                        if mob.0.x == player.0.x + 1 && mob.0.y == player.0.y {
+                            // Attack mob
+                            println!("Attack {:?}", mob.1.0);
+                            mob.2.0 = mob.2.0 - 1;
+                            is_attack = true;
+                            break;
+                        }
+                    }
+                    if !is_attack {
+                        player.0.x += 1;
+                        player.1.translation.x += 1.0 * TILESIZE as f32;
+                    }
                 }
             }
         }

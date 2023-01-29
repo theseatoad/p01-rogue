@@ -2,7 +2,7 @@
 // Updating lighting
 // Despawning tile under enemies and players
 use crate::{
-    components::{LitTile, MainCamera, Mob, Position, POV},
+    components::{LitTile, MainCamera, Mob, Position, POV, MobType},
     map::Level,
     player::Player,
     resources::GlyphAssets,
@@ -27,11 +27,11 @@ impl Plugin for RenderingPlugin {
 
 // Despawn tiles under mobs
 fn update_tile_vis_and_explore(
-    mut mob_query: Query<(&Position, &mut POV), (Changed<Position>, With<Mob>)>,
+    mut mob_query: Query<(&Position, &mut POV, &Mob), (Changed<Position>, With<Mob>)>,
     mut map: ResMut<Level>,
 ) {
     // Need to calculate what the mob can see.
-    for (position, mut pov) in mob_query.iter_mut() {
+    for (position, mut pov, mob) in mob_query.iter_mut() {
         pov.visible_tiles.clear();
         pov.newly_revealed_tiles.clear();
         // Calculate visible tiles near position.
@@ -42,7 +42,8 @@ fn update_tile_vis_and_explore(
                     bresenham_line_enhanced(&(position.x, position.y), &(x, y), &map)
                 {
                     pov.visible_tiles.push((Position { x, y }, light));
-                    if map.revealed_tiles.insert(Point {
+
+                    if mob.0 == MobType::PLAYER && map.revealed_tiles.insert(Point {
                         x: x as usize,
                         y: y as usize,
                     }) == true

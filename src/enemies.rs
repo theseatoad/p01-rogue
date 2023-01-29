@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{components::{Position, POV, Mob, MobType}, tiles::TILESIZE, resources::GlyphAssets, map::Level};
+use crate::{components::{Position, POV, Mob, MobType}, tiles::TILESIZE, resources::GlyphAssets, map::Level, player::Player, health::Health};
+
+#[derive(Component, Default, Debug)]
+pub struct Enemy;
 
 #[derive(Component, Default, Debug)]
 pub struct Orc;
@@ -10,9 +13,11 @@ pub struct OrcBundle {
     #[bundle]
     sprite_sheet_bundle: SpriteSheetBundle,
     orc: Orc,
+    enemy : Enemy,
     position: Position,
     pov: POV,
     mob: Mob,
+    health : Health
 }
 
 impl OrcBundle {
@@ -40,6 +45,7 @@ impl OrcBundle {
                 ..default()
             },
             orc: Orc,
+            enemy : Enemy,
             position: Position {
                 x: location.0,
                 y: location.1,
@@ -49,7 +55,8 @@ impl OrcBundle {
                 newly_revealed_tiles: Vec::new(),
                 range: 8,
             },
-            mob: Mob,
+            mob: Mob(MobType::ORC),
+            health : Health(4),
         }
     }
 }
@@ -62,9 +69,11 @@ pub struct GoblinBundle {
     #[bundle]
     sprite_sheet_bundle: SpriteSheetBundle,
     goblin: Goblin,
+    enemy : Enemy,
     position: Position,
     pov: POV,
     mob: Mob,
+    health : Health
 }
 
 impl GoblinBundle {
@@ -92,6 +101,7 @@ impl GoblinBundle {
                 ..default()
             },
             goblin: Goblin,
+            enemy : Enemy,
             position: Position {
                 x: location.0,
                 y: location.1,
@@ -101,7 +111,8 @@ impl GoblinBundle {
                 newly_revealed_tiles: Vec::new(),
                 range: 8,
             },
-            mob: Mob,
+            mob: Mob(MobType::GOBLIN),
+            health : Health(3),
         }
     }
 }
@@ -121,4 +132,13 @@ fn setup(mut commands: Commands, atlas: Res<GlyphAssets>, map: Res<Level>) {
             commands.spawn(GoblinBundle::new((mob.0.x.try_into().unwrap(), mob.0.y.try_into().unwrap()), atlas.atlas.clone()));
         }
     };
+}
+
+fn movement(
+    mut commands: Commands,
+    enemy_query: Query<(&mut Position, &POV, With<Enemy>)>,
+    player_query: Query<&Position, (Changed<Position>, With<Player>)>,
+    map: Res<Level>,
+) {
+
 }

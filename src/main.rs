@@ -1,6 +1,7 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
 use components::MainCamera;
 use enemies::EnemyPlugin;
+use health::HealthPlugin;
 use map::MapPlugin;
 use player::PlayerPlugin;
 use rendering::{RenderingPlugin, WINDOWSIZE};
@@ -13,7 +14,7 @@ mod resources;
 mod tiles;
 mod utils;
 mod enemies;
-//bevy_inspector_egui::quick::WorldInspectorPlugin;
+mod health;
 
 fn main() {
     App::new()
@@ -31,12 +32,12 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
-        //.add_plugin(WorldInspectorPlugin)
         .add_startup_system(setup.at_start())
         .add_plugin(MapPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(RenderingPlugin)
+        .add_plugin(HealthPlugin)
         .run();
 }
 

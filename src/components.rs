@@ -21,7 +21,7 @@ pub struct POV {
 
 /// Represents player or enemy.
 #[derive(Component)]
-pub struct Mob;
+pub struct Mob(pub MobType);
 
 /// Represents a lit tile
 #[derive(Component)]
