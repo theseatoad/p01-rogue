@@ -17,4 +17,4 @@ For the first month of 2023, I prototyped a rough "clone" of rogue and nethack. 
 - Ensure rust toolchain is installed with ```$ rustc --version```
 - - If you need to install it: ```$ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh```
 - Clone repository or download source from releases.
-- Wit
+- Navigate to root directory and ```$ cargo run ```
