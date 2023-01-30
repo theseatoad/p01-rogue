@@ -1,5 +1,5 @@
 [package]
-name = "p01_3dr"
+name = "p01-rogue"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,3 +10,4 @@ bevy = "0.9"
 map-gen-2d = "0.1.2"
 rand = "0.8.5"
 console_error_panic_hook = "0.1"
+bevy_embedded_assets = "0.6.2"

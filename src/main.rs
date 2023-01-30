@@ -1,4 +1,5 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy_embedded_assets::EmbeddedAssetPlugin;
 use components::MainCamera;
 use enemies::EnemyPlugin;
 use health::HealthPlugin;
@@ -31,6 +32,8 @@ fn main() {
                     },
                     ..default()
                 })
+                .build()
+                .add_before::<bevy::asset::AssetPlugin, _>(EmbeddedAssetPlugin)
                 .set(ImagePlugin::default_nearest()),
         )
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
