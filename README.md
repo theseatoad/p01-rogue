@@ -18,3 +18,8 @@ For the first month of 2023, I prototyped a rough "clone" of rogue and nethack. 
 - - If you need to install it: ```$ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh```
 - Clone repository or download source from releases.
 - Navigate to root directory and ```$ cargo run ```
+
+
+## Change the seed in the seedable random generation
+
+To change the seed, navigate to `line 26 in /src/map.rs`. Change the ```XXXX``` to any u64 in ```SeedableRng::seed_from_u64(XXXX)```.
